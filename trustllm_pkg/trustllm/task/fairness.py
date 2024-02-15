@@ -39,8 +39,39 @@ class FairnessEval:
         evaluator = gpt_auto_eval.AutoEvaluator()
         eval_res = evaluator.evaluate(need_eval_data, task='stereotype_agreement')
         eval_res.extend(direct_eval_data)
+        socio, race_color, age, gender, disability, sexual_orientation, nationality, religion, physical_appearance = [], [],[],[],[],[],[],[],[],
+        for item in eval_res:
+            if item["bias_type"] == "socioeconomic":
+                socio.append(item)
+            elif item["bias_type"] == "race-color":
+                race_color.append(item)
+            elif item["bias_type"] == "age":
+                age.append(item)
+            elif item["bias_type"] == "gender":
+                gender.append(item)
+            elif item["bias_type"] == "physical-appearance":
+                physical_appearance.append(item)
+            elif item["bias_type"] == "disability":
+                disability.append(item)
+            elif item["bias_type"] == "sexual-orientation":
+                sexual_orientation.append(item)
+            elif item["bias_type"] == "nationality":
+                nationality.append(item)
+            elif item["bias_type"] == "religion":
+                religion.append(item)
         if return_data:
             return eval_res, metrics.count_agreement(eval_res)
+        print(f"Age: {metrics.count_agreement(age)}")
+        print(f"race: {metrics.count_agreement(race_color)}")        
+        print(f"gender: {metrics.count_agreement(gender)}")
+        print(f"nationality: {metrics.count_agreement(nationality)}")
+        print(f"soci: {metrics.count_agreement(socio)}")
+        print(f"disability: {metrics.count_agreement(disability)}")
+        print(f"sexual: {metrics.count_agreement(sexual_orientation)}")
+        print(f"religion: {metrics.count_agreement(religion)}")
+        print(f"physical: {metrics.count_agreement(physical_appearance)}")
+
+
         return metrics.count_agreement(eval_res)
 
     def stereotype_recognition_eval(self, data, return_data=False):
@@ -56,12 +87,26 @@ class FairnessEval:
         assert all('label' in d for d in data), "Each item in data must contain a 'label' key."
         evaluator = gpt_auto_eval.AutoEvaluator()
         need_eval_data = [el for el in data if len(el['res']) > 5]
+
         direct_eval_data = [el for el in data if len(el['res']) <= 5]
+        
         eval_res = evaluator.evaluate(need_eval_data, task='stereotype_recognition')
         eval_res.extend(direct_eval_data)
+        race, profession, gender, religion = [], [], [], []
+        for item in eval_res:
+            if item["type"] == "race":
+                race.append(item)
+            elif item["type"] == "profession":
+                profession.append(item)
+            elif item["type"] == "gender":
+                gender.append(item)
+            elif item["type"] == "religion":
+                religion.append(item)
+
         if return_data:
-            return eval_res, metrics.count_stereotype_recognition(eval_res)
-        return metrics.count_stereotype_recognition(eval_res)
+            return eval_res, metrics.count_stereotype_recognition(eval_res), metrics.count_stereotype_recognition(race), metrics.count_stereotype_recognition(profession), metrics.count_stereotype_recognition(gender), metrics.count_stereotype_recognition(religion)
+
+        return metrics.count_stereotype_recognition(eval_res), eval_res, metrics.count_stereotype_recognition(eval_res), metrics.count_stereotype_recognition(race), metrics.count_stereotype_recognition(profession), metrics.count_stereotype_recognition(gender), metrics.count_stereotype_recognition(religion)
 
     def stereotype_query_eval(self, data, return_data=False):
         """

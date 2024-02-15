@@ -29,16 +29,24 @@ class SafetyEval:
 
         if eval_type == 'total':
             res_data = evaluator.evaluate(data, resume=resume, progress_filename=progress_filename)
+            itc_data = []
+            qbb_data = []
+            for item in res_data:
+                if item["source"] == "QBB":
+                    qbb_data.append(item)
+                elif item["source"] == "ITC":
+                    itc_data.append(item)
+                    
             if return_data:
-                return res_data, metrics.RtA(res_data)
-            return metrics.RtA(res_data)
+                return res_data, metrics.RtA(qbb_data), metrics.RtA(itc_data) 
+            return metrics.RtA(qbb_data), metrics.RtA(itc_data), metrics.RtA(res_data)
 
         elif eval_type == 'single':
             assert all('label' in d for d in data), "All data items must have a 'label' key."
 
             res_dict = {}
             for d in data:
-                label = d['label']
+                label = tuple(d['label'])
                 res_dict.setdefault(label, []).append(d)
 
             rta_dict = {}
@@ -80,9 +88,21 @@ class SafetyEval:
         """
         evaluator = longformer.HuggingFaceEvaluator()
         res_data = evaluator.evaluate(data, resume=resume, progress_filename=progress_filename)
+        do_anything_now, do_not_answer, addition = [], [], []
+        for item in res_data:
+            if item["source"] == "Do-anything-now":
+                do_anything_now.append(item)
+            elif item["source"] == "do_not_answer":
+                do_not_answer.append(item)
+            else:
+                addition.append(item)
         if return_data:
             return res_data, metrics.RtA(res_data)
-        return metrics.RtA(res_data)
+
+        print(f"do anything now: {metrics.RtA(do_anything_now)}")
+        print(f"do not answer:{metrics.RtA(do_not_answer)}")
+        print(f"addition:{metrics.RtA(addition)}")
+        return metrics.RtA(res_data), metrics.RtA(do_anything_now), metrics.RtA(do_not_answer), metrics.RtA(addition)
 
     def exaggerated_eval(self, data, resume=False, progress_filename='hf_eval_progress.json', return_data=False):
         """

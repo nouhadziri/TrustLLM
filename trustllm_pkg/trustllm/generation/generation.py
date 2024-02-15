@@ -77,7 +77,7 @@ class LLMGeneration:
     def _prompt2conversation(self, prompt):
         msg = prompt
         conv = get_conversation_template(self.model_path)
-        conv.set_system_message('')
+        #conv.set_system_message('')
         conv.append_message(conv.roles[0], msg)
         conv.append_message(conv.roles[1], None)
         conversation = conv.get_prompt()

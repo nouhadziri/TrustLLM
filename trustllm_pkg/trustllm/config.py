@@ -14,7 +14,7 @@ zhipu_api = None
 
 max_worker = 1
 
-azure_openai = True
+azure_openai = False
 azure_engine = None
 azure_api_version = "2023-08-01-preview"
 azure_api_base = None

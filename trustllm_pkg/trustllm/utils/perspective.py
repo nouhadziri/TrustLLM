@@ -47,7 +47,8 @@ class PerspectiveEval:
 
         analyze_request = {
             'comment': {'text': sentence},
-            'requestedAttributes': {'TOXICITY': {}}
+            'requestedAttributes': {'TOXICITY': {}},
+            "languages": ["en"],
         }
 
         response = client.comments().analyze(body=analyze_request).execute()
